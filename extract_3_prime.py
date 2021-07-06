@@ -46,14 +46,17 @@ def shorten_exons(exons,distance):
     split_exons = [x.split("\t") for x in exons]
 
     # We'll just do different logic for forward and
-    # reverse
-    if split_exons[0][5] == "+":
-        split_exons.sort(key=lambda x: int(x[3]))
-
-    else :
-        #It's reverse
+    # reverse.  We want the exons sorted from last
+    # to first so we get things from the 3' end
+    if split_exons[0][6] == "+":
         split_exons.sort(key=lambda x: int(x[3]), reverse=True)
-        pass
+
+    elif split_exons[0][6] == "-":
+        # It's reverse
+        split_exons.sort(key=lambda x: int(x[3]))
+    
+    else:
+        raise ValueError("Strand "+split_exons[0][6]+" wasn't + or -")
 
     distance_so_far = 0
     for e in split_exons:
