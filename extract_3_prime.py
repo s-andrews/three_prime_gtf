@@ -31,7 +31,14 @@ def filter_gtf(annot, distance):
     filtered_annot = {}
     for gene,value in annot.items():
         value = value.copy()
-        value["exons"] = shorten_exons(value["exons"],distance)
+        value["exons"],start,stop = shorten_exons(value["exons"],distance)
+
+        # Fix the start / stop on the gene feature
+        gene_sections = value["gene_gtf"].split("\t")
+        gene_sections[3] = str(start)
+        gene_sections[4] = str(stop)
+
+        value["gene_gtf"]  = "\t".join(gene_sections)
 
         filtered_annot[gene] = value
 
@@ -84,13 +91,27 @@ def shorten_exons(exons,distance):
             short_exons.append(e)
             break
 
+    # We need to get the overall start and stop for the shortened
+    # exons so we can ajdust the gene feature later
+    start = 0
+    end = 0
+
+    for i,e in enumerate(short_exons):
+        if i==0:
+            start = int(e[3])
+            end = int(e[4])
+        else:
+            if int(e[3]) < start:
+                start = int(e[3])
+            if int(e[4]) > end:
+                end = int(e[4])
 
     # Re-sort and convert back to text
     short_exons.sort(key=lambda x: int(x[3]))
 
     short_exons = ["\t".join(x) for x in short_exons]
 
-    return short_exons
+    return (short_exons,start,end)
 
 def read_gtf(file, canonical):
     genes = {}
