@@ -17,10 +17,15 @@ def main():
     annot = read_gtf(prefs.gtf, canonical_transcripts)
 
     filtered = filter_gtf(annot,prefs.distance)
-    # write_gtf(filtered,prefs.outfile)
+    
+    write_gtf(filtered,prefs.outfile)
 
 def write_gtf(annot,outfile):
-    pass
+    with gzip.open(outfile,"wt") as out:
+        for v in annot.values():
+            print(v["gene_gtf"],file=out,end="")
+            for e in v["exons"]:
+                print(e,file=out,end="")
 
 def filter_gtf(annot, distance):
     filtered_annot = {}
@@ -107,15 +112,8 @@ def read_gtf(file, canonical):
                 # Add the gene to the data
                 genes[attributes["gene_id"]] = {
                     "gene_gtf" : line,
-                    "transcript_gtf" : "",
                     "exons" : []
                 }
-
-            elif type=="transcript":
-                if attributes["transcript_id"] not in canonical:
-                    continue
-
-                genes[attributes["gene_id"]]["transcript_gtf"] = line
 
             elif type=="exon":
                 if attributes["transcript_id"] not in canonical:
