@@ -124,8 +124,8 @@ def read_gtf(file, canonical):
                 continue
 
             # Just for testing only do chr1
-            if not line.startswith("1"):
-                break
+            # if not line.startswith("1"):
+            #     break
 
             type,attributes = parse_line(line)
 
